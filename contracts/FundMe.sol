@@ -4,9 +4,12 @@ pragma solidity ^0.8.24;
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
 contract FundMe {
-    address ethUsdPriceFeedAddress = 0x694AA1769357215DE4FAC081bf1f309aDC325306;
-    uint256 minimumInUsd = 5e18;
-    AggregatorV3Interface priceFeed;
+    address internal ethUsdPriceFeedAddress = 0x694AA1769357215DE4FAC081bf1f309aDC325306;
+    uint256 internal minimumInUsd = 5e18;
+    address[] public funders;
+    mapping(address funder =>uint256 amount) public funds;
+
+    AggregatorV3Interface internal priceFeed;
 
     constructor() {
         priceFeed = AggregatorV3Interface(ethUsdPriceFeedAddress);
@@ -14,6 +17,8 @@ contract FundMe {
 
     function fund() public payable {
         require(getConversionRate(msg.value) >= minimumInUsd, "didn't send enough ETH");
+        funders.push(msg.sender);
+        funds[msg.sender] = funds[msg.sender] + msg.value;
     }
 
     function withdraw() public {}
